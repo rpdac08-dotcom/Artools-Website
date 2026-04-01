@@ -47,6 +47,11 @@
             --text-dark: #1C1C1C;
         }
 
+        html {
+            /* Ensures native smooth scroll fallback */
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-light);
@@ -55,10 +60,26 @@
             /* Hide scrollbar for premium aesthetic */
             scrollbar-width: none;
             -ms-overflow-style: none;
+            /* GPU acceleration hint */
+            -webkit-font-smoothing: antialiased;
         }
 
         body::-webkit-scrollbar {
             display: none;
+        }
+
+        /* Mobile: disable complex transitions that cause jank */
+        @media (max-width: 768px) {
+            * {
+                -webkit-tap-highlight-color: transparent;
+            }
+            /* Force GPU layer for sticky elements */
+            #hero-sticky {
+                transform: translateZ(0);
+                -webkit-transform: translateZ(0);
+                backface-visibility: hidden;
+                -webkit-backface-visibility: hidden;
+            }
         }
 
         /* Grid / Noise overlay extraído do design_system.html */
@@ -128,8 +149,69 @@
 
         /* Prevenir flashes enquanto carrega vídeo */
         #hero-video {
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform, filter;
+            will-change: opacity;
+        }
+
+        /* Canvas do hero: garante renderização acelerada */
+        #hero-canvas {
+            will-change: contents;
+            image-rendering: auto;
+        }
+
+        /* Hero mobile: imagem acima do texto */
+        @media (max-width: 767px) {
+            #hero-sticky {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+            #video-wrapper {
+                order: 1 !important;
+                position: relative !important;
+                width: 100% !important;
+                height: 50dvh !important;
+                top: auto !important;
+                right: auto !important;
+                bottom: auto !important;
+                left: auto !important;
+            }
+            #hero-left-col {
+                order: 2 !important;
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 50dvh;
+                top: auto !important;
+                left: auto !important;
+                padding-top: 1.5rem !important;
+            }
+        }
+
+        /* Terceira dobra: layout vertical no mobile */
+        @media (max-width: 767px) {
+            #legacy-scroll {
+                height: auto !important;
+                overflow: visible !important;
+            }
+            #legacy-track {
+                width: 100% !important;
+                flex-direction: column !important;
+                height: auto !important;
+                transform: none !important;
+            }
+            #legacy-track > div {
+                width: 100% !important;
+                height: auto !important;
+                padding: 3rem 1.5rem !important;
+                flex-direction: column !important;
+            }
+            /* Imagem primeiro no mobile para todos os painéis */
+            #legacy-track > div > div:first-child {
+                order: 1 !important;
+            }
+            #legacy-track > div > div:last-child {
+                order: 2 !important;
+            }
         }
 
         /* Quarta Dobra Efeito Glow Gemini */
@@ -176,20 +258,20 @@
     </header>
 
     <!-- Scroll Container Secundário (Define a duração da interação de scroll) -->
-    <main id="scroll-container" class="relative h-[350vh] bg-[#EAEAE5]">
+    <main id="scroll-container" class="relative h-[350vh] md:h-[350vh] bg-[#EAEAE5]">
         
         <!-- Sticky Area que segura a interface da Hero -->
-        <div class="sticky top-0 h-[100dvh] w-full overflow-hidden bg-grid cinematic-overlay" id="hero-sticky">
+        <div class="sticky top-0 h-[100dvh] w-full overflow-hidden bg-grid cinematic-overlay flex flex-col md:block" id="hero-sticky">
             
             <!-- Esquerda: Typography Elements (Textos e Botões) -->
-            <div class="absolute top-0 left-0 w-full md:w-5/12 h-1/2 md:h-full flex flex-col justify-center px-8 md:pl-16 lg:pl-32 pr-8 z-20 pt-20 md:pt-0" id="hero-left-col">
+            <div class="absolute top-0 left-0 w-full md:w-5/12 h-1/2 md:h-full flex flex-col justify-center px-8 md:pl-16 lg:pl-32 pr-8 z-20 pt-16 md:pt-0" id="hero-left-col">
                
-               <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-semibold tracking-tighter leading-[0.9] text-stone-900 mb-6 lg:mb-8" id="hero-title">
+               <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] font-semibold tracking-tighter leading-[0.9] text-stone-900 mb-4 md:mb-8" id="hero-title">
                   <span class="block overflow-hidden pb-1 md:pb-3"><span class="block hero-text">Escrita</span></span>
                   <span class="block overflow-hidden pb-1 md:pb-3"><span class="block hero-text text-stone-400">Absoluta.</span></span>
                </h1>
                
-               <p class="text-lg sm:text-xl md:text-2xl text-stone-600 font-light mb-10 md:mb-12 max-w-[90%] opacity-0 leading-relaxed" id="hero-sub">
+               <p class="text-base sm:text-lg md:text-2xl text-stone-600 font-light mb-6 md:mb-12 max-w-[90%] opacity-0 leading-relaxed" id="hero-sub">
                   Onde a engenharia de precisão encontra a elegância atemporal. Redescubra o peso e a fluidez dos seus pensamentos em sua forma mais pura.
                </p>
                
@@ -206,7 +288,7 @@
             </div>
 
             <!-- Direita: Cinematic Video -->
-            <div class="absolute bottom-0 right-0 md:top-0 w-full md:w-7/12 h-1/2 md:h-full flex items-center justify-center pointer-events-none z-10" id="video-wrapper">
+            <div class="absolute bottom-0 right-0 md:top-0 w-full md:w-7/12 h-1/2 md:h-full flex items-center justify-center pointer-events-none z-10 md:z-10" id="video-wrapper">
                
                <!-- Gradientes para transição de opacidade/borda imperceptível do vídeo pra cor base (SOME NA CENTRALIZAÇÃO) -->
                <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#EAEAE5] to-transparent z-20 hidden md:block video-gradient"></div>
@@ -313,17 +395,17 @@
         </div>
     </section>
 
-    <!-- Terceira Dobra: A Esteira de Exposição (Light Mode Horizontal Pin, 3 Painéis) -->
-    <section id="legacy-scroll" class="relative bg-[#EAEAE5] text-[#1C1C1C] overflow-hidden h-[100dvh] w-full bg-grid">
+    <!-- Terceira Dobra: A Esteira de Exposição (Desktop: Horizontal Pin | Mobile: Vertical Stack) -->
+    <section id="legacy-scroll" class="relative bg-[#EAEAE5] text-[#1C1C1C] overflow-hidden md:h-[100dvh] w-full bg-grid">
         <!-- The sticky container that moves horizontally -->
-        <div id="legacy-track" class="flex h-full w-[300vw] relative z-10 will-change-transform items-center">
+        <div id="legacy-track" class="flex md:h-full w-full md:w-[300vw] relative z-10 md:will-change-transform items-center flex-col md:flex-row">
             
             <!-- Painel 1: A Fluidez -->
-            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
-                <!-- Imagem -->
-                <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content">
+            <div class="w-full md:w-[100vw] md:h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-8 md:gap-12 md:shrink-0 py-16 md:py-0 relative">
+                <!-- Imagem (sempre primeiro: order-1 no mobile, order-1 no desktop) -->
+                <div class="w-full md:w-1/2 flex justify-center order-1 legacy-content">
                     <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
-                        <img src="assets/images/pen-light.png" alt="Artools Pigmentum Detail" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105">
+                        <img src="assets/images/pen-light.png" alt="Artools Pigmentum Detail" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" loading="lazy">
                         <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
                             <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Ponta Ultrafina</span>
                             <span class="text-sm font-semibold tracking-tight text-stone-800">Fluxo Ininterrupto</span>
@@ -331,47 +413,46 @@
                     </div>
                 </div>
                 <!-- Copy -->
-                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content">
+                <div class="w-full md:w-1/2 order-2 pl-0 md:pl-16 legacy-content">
                     <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">01 / A Consistência Absoluta</span>
-                    <h2 class="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                    <h2 class="text-4xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-5 md:mb-8">
                         Um toque.<br><span class="text-stone-400">O ponto de inflexão.</span>
                     </h2>
-                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                    <p class="text-stone-500 text-sm md:text-xl font-light leading-relaxed max-w-xl">
                         A verdadeira engenharia não é vista, é vivenciada. Sintetizamos um polímero de matriz cristalina que reage de forma orgânica ao menor contato com as fibras do papel. Sem falhas. Sem interrupções. Apenas um fluxo contínuo e impecável desenhado para blindar a velocidade do seu pensamento.
                     </p>
                 </div>
             </div>
 
             <!-- Painel 2: O Controle -->
-            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
-                <!-- Imagem -->
-                <div class="w-full md:w-1/2 h-[50%] md:h-[70%] relative flex justify-center order-2 md:order-1 legacy-content-2">
-                    <div class="relative w-full h-full rounded-[2rem] overflow-hidden shadow-xl bg-stone-300 border border-white/50 group">
-                        <!-- Imagem 2.png Original -->
-                        <img src="assets/images/pen-hero.png" alt="Artools Components" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply opacity-95">
+            <div class="w-full md:w-[100vw] md:h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-8 md:gap-12 md:shrink-0 py-16 md:py-0 relative">
+                <!-- Imagem (sempre primeiro) -->
+                <div class="w-full md:w-1/2 md:h-[70%] relative flex justify-center order-1 legacy-content-2">
+                    <div class="relative w-full aspect-[4/3] md:h-full rounded-[2rem] overflow-hidden shadow-xl bg-stone-300 border border-white/50 group">
+                        <img src="assets/images/pen-hero.png" alt="Artools Components" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 mix-blend-multiply opacity-95" loading="lazy">
                         <div class="absolute bottom-6 right-6 flex items-center gap-3 backdrop-blur-md bg-white/60 p-3 rounded-full border border-white/80 shadow-sm">
                             <span class="text-[0.65rem] uppercase font-mono tracking-widest text-stone-600 font-semibold px-2">Alumínio 6061</span>
                         </div>
                     </div>
                 </div>
                 <!-- Copy -->
-                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content-2">
+                <div class="w-full md:w-1/2 order-2 pl-0 md:pl-16 legacy-content-2">
                     <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">02 / O Centro de Gravidade</span>
-                    <h2 class="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                    <h2 class="text-4xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-5 md:mb-8">
                         Balanceamento<br><span class="text-stone-400">Isobárico.</span>
                     </h2>
-                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                    <p class="text-stone-500 text-sm md:text-xl font-light leading-relaxed max-w-xl">
                         O controle absoluto exige mais que leveza; exige distribuição milimétrica. A coroa capilar e o corpo em alumínio aeroespacial 6061 foram calibrados metodicamente para que a caneta repouse de forma simbiótica no arco da sua mão. Zero fadiga muscular. Cento e cem por cento de foco criativo.
                     </p>
                 </div>
             </div>
 
             <!-- Painel 3: Arquitetura -->
-            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
-                <!-- Imagem -->
-                <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content-3">
+            <div class="w-full md:w-[100vw] md:h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-8 md:gap-12 md:shrink-0 py-16 md:py-0 relative">
+                <!-- Imagem (sempre primeiro) -->
+                <div class="w-full md:w-1/2 flex justify-center order-1 legacy-content-3">
                     <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
-                        <img src="assets/images/pen-arch.png" alt="Pigmentum Architecture" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply saturate-50">
+                        <img src="assets/images/pen-arch.png" alt="Pigmentum Architecture" class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 mix-blend-multiply saturate-50" loading="lazy">
                         <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
                             <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Câmara Estanque</span>
                             <span class="text-sm font-semibold tracking-tight text-stone-800">Zero Vazamentos</span>
@@ -379,12 +460,12 @@
                     </div>
                 </div>
                 <!-- Copy -->
-                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content-3">
+                <div class="w-full md:w-1/2 order-2 pl-0 md:pl-16 legacy-content-3">
                     <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">03 / A Longevidade</span>
-                    <h2 class="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                    <h2 class="text-4xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-5 md:mb-8">
                         A arquitetura<br><span class="text-stone-400">oculta.</span>
                     </h2>
-                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                    <p class="text-stone-500 text-sm md:text-xl font-light leading-relaxed max-w-xl">
                         Por trás de uma superfície minimalista de pureza inegável, esconde-se um invólucro hiper-resistente. Projetada para suportar pressões extremas, a Pigmentum é uma cápsula de durabilidade vitalícia construída não apenas para você, mas para os seus herdeiros.
                     </p>
                 </div>
@@ -434,66 +515,63 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            
-            // 1. Lenis: Smooth Scroll
+
+            // Detecta se é mobile para ajustar comportamentos
+            const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+            // 1. Lenis: Smooth Scroll — configurado para performance máxima no mobile
             const lenis = new Lenis({
-                duration: 1.0,
-                easing: (t) => 1 - Math.pow(1 - t, 4),
-                smoothTouch: false,
-                touchMultiplier: 1.5,
-                lerp: 0.08,
+                // No mobile usamos valores mais rápidos para scroll responsivo
+                duration: isMobile ? 0.6 : 1.0,
+                easing: (t) => 1 - Math.pow(1 - t, 3),
+                smoothTouch: false,       // NUNCA suavizar touch nativo (causa travamento)
+                touchMultiplier: 2.0,     // Touch mais responsivo
+                lerp: isMobile ? 0.15 : 0.1,
+                normalizeWheel: true,
             });
 
-            function raf(time) {
-                lenis.raf(time);
-                requestAnimationFrame(raf);
-            }
-            requestAnimationFrame(raf);
+            // Sincroniza Lenis com ScrollTrigger
+            lenis.on('scroll', ScrollTrigger.update);
+
+            gsap.ticker.add((time) => {
+                lenis.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
 
             // 2. GSAP e Animações Iniciais
             gsap.registerPlugin(ScrollTrigger);
-            
-            // Estado inicial dos elementos para evitar flash
-            gsap.set('.hero-text', { y: '120%', filter: 'blur(10px)' });
-            gsap.set('#hero-sub', { opacity: 0, y: 30, filter: 'blur(5px)' });
-            gsap.set('#hero-cta', { opacity: 0, y: 30 });
-            gsap.set('#navbar', { opacity: 0, y: -20 });
 
-            const masterTl = gsap.timeline();
-            masterTl
-                .to('#hero-canvas', { 
-                    opacity: 1, 
-                    duration: 2.2, 
-                    ease: 'power3.out' 
-                })
-                .to('.hero-text', { 
-                    y: '0%', 
-                    filter: 'blur(0px)', 
-                    duration: 1.4, 
-                    stagger: 0.15, 
-                    ease: 'power4.out' 
-                }, '-=1.4')
-                .to('#hero-sub', { 
-                    opacity: 1, 
-                    y: 0, 
-                    filter: 'blur(0px)', 
-                    duration: 1.2, 
-                    ease: 'power3.out' 
-                }, '-=1.1')
-                .to('#hero-cta', { 
-                    opacity: 1, 
-                    y: 0, 
-                    duration: 1, 
-                    ease: 'power3.out' 
-                }, '-=0.9')
-                .to('#navbar', { 
-                    opacity: 1, 
-                    y: 0, 
-                    duration: 1.2, 
-                    ease: 'power3.out' 
-                }, '-=1.2');
+            // No mobile: animações simplificadas (sem blur — blur é PESADO no mobile)
+            if (isMobile) {
+                gsap.set('.hero-text', { y: '100%' });
+                gsap.set('#hero-sub', { opacity: 0, y: 20 });
+                gsap.set('#hero-cta', { opacity: 0, y: 20 });
+                gsap.set('#navbar', { opacity: 0 });
 
-            // 3. Mecânica do Vídeo Transformado em Cache de Imagens (Canvas Array)
+                const masterTl = gsap.timeline();
+                masterTl
+                    .to('#hero-canvas', { opacity: 1, duration: 1.2, ease: 'power2.out' })
+                    .to('.hero-text', { y: '0%', duration: 0.8, stagger: 0.1, ease: 'power3.out' }, '-=0.8')
+                    .to('#hero-sub', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, '-=0.5')
+                    .to('#hero-cta', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+                    .to('#navbar', { opacity: 1, duration: 0.5 }, '-=0.6');
+            } else {
+                // Desktop: animações completas com blur
+                gsap.set('.hero-text', { y: '120%', filter: 'blur(8px)' });
+                gsap.set('#hero-sub', { opacity: 0, y: 30, filter: 'blur(4px)' });
+                gsap.set('#hero-cta', { opacity: 0, y: 30 });
+                gsap.set('#navbar', { opacity: 0, y: -20 });
+
+                const masterTl = gsap.timeline();
+                masterTl
+                    .to('#hero-canvas', { opacity: 1, duration: 2.0, ease: 'power3.out' })
+                    .to('.hero-text', { y: '0%', filter: 'blur(0px)', duration: 1.2, stagger: 0.15, ease: 'power4.out' }, '-=1.4')
+                    .to('#hero-sub', { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.0, ease: 'power3.out' }, '-=1.0')
+                    .to('#hero-cta', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, '-=0.8')
+                    .to('#navbar', { opacity: 1, y: 0, duration: 1.0, ease: 'power3.out' }, '-=1.0');
+            }
+
+            // 3. Mecânica do Vídeo — Canvas Frame Cache
             const video = document.getElementById('hero-video');
             const canvas = document.getElementById('hero-canvas');
             const ctx = canvas.getContext('2d');
@@ -502,24 +580,24 @@
             let scrollIsInit = false;
             let expectedTotalFrames = 0;
 
+            // No mobile: extrair menos frames para economizar memória
+            const targetFPS = isMobile ? 15 : 30;
+            // No mobile: resolução menor para memória
+            const maxWidth = isMobile ? 720 : 1080;
+
             video.addEventListener('loadedmetadata', () => {
-                const duration = video.duration || 5; 
-                const fps = 30; // Garante extração rápida
-                expectedTotalFrames = Math.floor(duration * fps);
+                const duration = video.duration || 5;
+                expectedTotalFrames = Math.floor(duration * targetFPS);
                 let currentFrame = 0;
-                
-                // Extrai frames escalados para não saturar a memória RAM do usuário
-                const scale = Math.min(1080 / (video.videoWidth || 1080), 1);
-                canvas.width = (video.videoWidth * scale) || 1280;
-                canvas.height = (video.videoHeight * scale) || 720;
+
+                const scale = Math.min(maxWidth / (video.videoWidth || maxWidth), 1);
+                canvas.width = Math.round((video.videoWidth || 1280) * scale);
+                canvas.height = Math.round((video.videoHeight || 720) * scale);
 
                 function extractNextFrame() {
                     if (currentFrame >= expectedTotalFrames) {
                         extractionComplete = true;
-                        if (!scrollIsInit) {
-                            scrollIsInit = true;
-                            initScroll();
-                        }
+                        if (!scrollIsInit) { scrollIsInit = true; initScroll(); }
                         return;
                     }
                     video.currentTime = (currentFrame / expectedTotalFrames) * duration;
@@ -529,204 +607,161 @@
                     if (extractionComplete) return;
 
                     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                    
+
                     try {
-                        // Envia para VRAM do GPU de forma extremamente otimizada 
                         const bitmap = await createImageBitmap(canvas);
                         frames.push(bitmap);
                     } catch(e) {
-                         // Fallback básico para navegadores ultra restritos
-                         const img = new Image();
-                         img.src = canvas.toDataURL('image/jpeg', 0.85);
-                         frames.push(img);
+                        const img = new Image();
+                        img.src = canvas.toDataURL('image/jpeg', 0.8);
+                        frames.push(img);
                     }
 
-                    // Se for o primeiro frame, printa na tela instantaneamente e libera o Scroll
                     if (currentFrame === 0) {
                         ctx.drawImage(frames[0], 0, 0, canvas.width, canvas.height);
-                        if (!scrollIsInit) {
-                            scrollIsInit = true;
-                            initScroll();
-                        }
+                        if (!scrollIsInit) { scrollIsInit = true; initScroll(); }
                     }
 
                     currentFrame++;
-                    
-                    // Continua a extração silenciosamente no background sem travar tudo
                     requestAnimationFrame(extractNextFrame);
                 });
 
-                // Dá o pontapé inicial puramente em background
                 extractNextFrame();
             });
 
             video.load();
 
             function initScroll() {
-                // Ao finalizar, o scroll apenas pinta no Canvas o índice lido da memória! 
-                // Custo de decode = zero.
                 const scrollParams = { progress: 0 };
-                
+
                 ScrollTrigger.create({
                     trigger: '#scroll-container',
                     start: 'top top',
                     end: 'bottom bottom',
                     scrub: true,
                     onUpdate: (self) => {
-                         // Transição suave customizada (0.1) entre o frame ideal e o atual 
-                        gsap.to(scrollParams, {
-                            progress: self.progress,
-                            ease: 'none',
-                            duration: 0.1,
-                            onUpdate: renderActiveFrame
-                        });
+                        // Scrub direto sem animação extra no mobile = mais fluído
+                        if (isMobile) {
+                            scrollParams.progress = self.progress;
+                            renderActiveFrame();
+                        } else {
+                            gsap.to(scrollParams, {
+                                progress: self.progress,
+                                ease: 'none',
+                                duration: 0.08,
+                                onUpdate: renderActiveFrame
+                            });
+                        }
                     }
                 });
 
                 function renderActiveFrame() {
                     if (frames.length === 0) return;
-                    
-                    // Calculamos matematicamente qual é o índice real com base no progresso longo
                     const targetIndex = Math.floor(scrollParams.progress * expectedTotalFrames);
-                    // Como a extração acontece no fundo, pode ser que o usuário dê scroll
-                    // antes de todas imagens sumirem. Usamos `min` para focar o limite do cache atual! 
                     const safeIndex = Math.min(targetIndex, frames.length - 1);
                     const renderIndex = Math.max(0, safeIndex);
-                    
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(frames[renderIndex], 0, 0, canvas.width, canvas.height);
                 }
-                
-                // Pinta o primeiro
+
                 renderActiveFrame();
             }
 
-            // 4. Parallax Sutil de Saída e Centralização Dinâmica do Vídeo
-            const parallaxTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: '#scroll-container',
-                    start: 'top top',
-                    end: '50% top',
-                    scrub: 1.5,
-                }
-            });
+            // 4. Parallax Hero — desabilitado no mobile para evitar jank
+            if (!isMobile) {
+                const parallaxTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '#scroll-container',
+                        start: 'top top',
+                        end: '50% top',
+                        scrub: 1.2,
+                    }
+                });
 
-            parallaxTl
-                .to('#hero-left-col', { x: '-20%', filter: 'blur(10px)', opacity: 0, duration: 1 }, 0)
-                .to('.video-gradient', { opacity: 0, duration: 0.5 }, 0)
-                .to('#video-wrapper', { width: '100%', ease: 'power2.inOut', duration: 1 }, 0);
-            
-            // Leve escala na interface inteira ao final do scroll, para integrar visualmente na 2a dobra
-            gsap.to('#hero-sticky', {
-                scale: 0.95,
-                transformOrigin: 'center center',
-                scrollTrigger: {
-                    trigger: '#scroll-container',
-                    start: '45% top',
-                    end: 'bottom bottom',
-                    scrub: true,
-                }
-            });
+                parallaxTl
+                    .to('#hero-left-col', { x: '-20%', opacity: 0, duration: 1 }, 0)
+                    .to('.video-gradient', { opacity: 0, duration: 0.5 }, 0)
+                    .to('#video-wrapper', { width: '100%', ease: 'power2.inOut', duration: 1 }, 0);
 
-            // 5. Animações da Segunda Dobra (Engenharia Light Mode)
-            const featureSectionTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: '#engineering-details',
-                    start: 'top 75%', 
-                    toggleActions: 'play none none reverse'
-                }
-            });
-
-            featureSectionTl
-                .from('.feature-header', {
-                    y: 60,
-                    opacity: 0,
-                    duration: 1.2,
-                    ease: 'power3.out'
-                })
-                .from('.feature-image', {
-                    y: 80,
-                    opacity: 0,
+                gsap.to('#hero-sticky', {
                     scale: 0.95,
-                    duration: 1.2,
-                    ease: 'power3.out'
-                }, '-=0.8')
-                .from('.feature-item', {
-                    x: 40,
-                    opacity: 0,
-                    duration: 1,
-                    stagger: 0.2, // Cascata dos textos na lateral direita
-                    ease: 'power3.out'
-                }, '-=1.0');
+                    transformOrigin: 'center center',
+                    scrollTrigger: {
+                        trigger: '#scroll-container',
+                        start: '45% top',
+                        end: 'bottom bottom',
+                        scrub: true,
+                    }
+                });
+            }
 
-            // 6. Horizontal Scroll Pinned (Terceira Dobra Light Mode)
+            // 5. Animações da Segunda Dobra
+            gsap.from('.feature-header', {
+                y: 50, opacity: 0, duration: 1.0, ease: 'power3.out',
+                scrollTrigger: { trigger: '#engineering-details', start: 'top 80%' }
+            });
+            gsap.from('.feature-image', {
+                y: 60, opacity: 0, scale: 0.96, duration: 1.0, ease: 'power3.out',
+                scrollTrigger: { trigger: '#engineering-details', start: 'top 75%' }
+            });
+            gsap.from('.feature-item', {
+                x: isMobile ? 0 : 40, y: isMobile ? 30 : 0, opacity: 0,
+                duration: 0.8, stagger: 0.15, ease: 'power3.out',
+                scrollTrigger: { trigger: '#engineering-details', start: 'top 70%' }
+            });
+
+            // 6. Terceira Dobra: Horizontal no desktop, simplificada no mobile
             const legacySection = document.getElementById('legacy-scroll');
             const track = document.getElementById('legacy-track');
 
-            if (legacySection && track) {
-                
-                // Animação Principal de Horizontal Scroll (Pin)
+            if (legacySection && track && !isMobile) {
+                // Desktop: horizontal pin
                 const horizontalTl = gsap.timeline({
                     scrollTrigger: {
                         trigger: legacySection,
                         pin: true,
-                        scrub: 1.5,
-                        start: "top top",
-                        end: () => "+=" + (track.offsetWidth),
+                        scrub: 1.2,
+                        start: 'top top',
+                        end: () => '+=' + track.offsetWidth,
                         invalidateOnRefresh: true
                     }
                 });
 
-                // Move 2 terços (Painéis 2,3 entram arrastados) - total 66.66% do contêiner de 300vw
-                horizontalTl.to(track, {
-                    xPercent: -66.666, 
-                    ease: "none"
-                });
+                horizontalTl.to(track, { xPercent: -66.666, ease: 'none' });
 
-                // Painel 1 entra na chegada da seção (Fade In suave, os outros já estarão visíveis na esteira)
                 gsap.from('.legacy-content', {
-                    y: 60,
-                    opacity: 0,
-                    stagger: 0.2,
-                    duration: 1.2,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: legacySection,
-                        start: "top 60%"
-                    }
+                    y: 50, opacity: 0, stagger: 0.15, duration: 1.0, ease: 'power3.out',
+                    scrollTrigger: { trigger: legacySection, start: 'top 65%' }
                 });
 
-                // Adiciona sutil efeito Parallax para que os quadros fiquem dinâmicos enquanto rolam via esteira
-                const panels = gsap.utils.toArray('.legacy-content-2, .legacy-content-3');
-                panels.forEach(panel => {
+                gsap.utils.toArray('.legacy-content-2, .legacy-content-3').forEach(panel => {
                     gsap.from(panel, {
-                        x: 100, // Leve deslocamento horizontal para que entrem um pouco mais devagar que o invólucro
-                        duration: 1.5,
-                        ease: "power2.out",
+                        x: 80, duration: 1.2, ease: 'power2.out',
                         scrollTrigger: {
                             trigger: panel,
                             containerAnimation: horizontalTl,
-                            start: "left 95%",
-                            toggleActions: "play none none reverse"
+                            start: 'left 95%',
+                            toggleActions: 'play none none reverse'
                         }
                     });
                 });
 
+            } else if (legacySection && track && isMobile) {
+                // Mobile: animações simples de fade-in para cada painel vertical
+                gsap.utils.toArray('#legacy-track > div').forEach((panel) => {
+                    gsap.from(panel, {
+                        y: 40, opacity: 0, duration: 0.8, ease: 'power2.out',
+                        scrollTrigger: { trigger: panel, start: 'top 85%' }
+                    });
+                });
             }
 
-            // --- 7. Animação da Quarta Dobra (Cinematic Clímax) ---
+            // 7. Quarta Dobra
             const glowCard = document.querySelector('#glow-card-container');
-            if(glowCard) {
+            if (glowCard) {
                 gsap.from(glowCard, {
-                    y: 100,
-                    opacity: 0,
-                    scale: 0.9,
-                    duration: 1.5,
-                    ease: "power3.out",
-                    scrollTrigger: {
-                        trigger: '#cinematic-climax',
-                        start: "top 70%",
-                    }
+                    y: 80, opacity: 0, scale: 0.92, duration: 1.2, ease: 'power3.out',
+                    scrollTrigger: { trigger: '#cinematic-climax', start: 'top 75%' }
                 });
             }
 
