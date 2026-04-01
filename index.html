@@ -3,7 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Premium Pen | Hero Concept</title>
+    <title>Artools Pigmentum | Caneta de Precisão Premium</title>
+    <meta name="description" content="A caneta de precisão Artools Pigmentum. Engenharia suíça, alumínio aeroespacial e fluxo de tinta molecular. Redescubra o peso e a fluidez do seu pensamento.">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -221,7 +222,7 @@
                <video 
                   id="hero-video"
                   class="hidden"
-                  src="a-seamless-looping-cinematic-product-video-of-a-pr.mp4"
+                  src="assets/video/hero-loop.mp4"
                   muted playsinline preload="auto"
                ></video>
                
@@ -252,7 +253,7 @@
                 
                 <!-- Imagem -->
                 <div class="feature-image relative w-full aspect-[4/3] md:aspect-[16/10] lg:aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-stone-300 border border-white/50">
-                    <img src="IMAGEM 2.png" alt="Artools Pigment Pen" class="w-full h-full object-cover transition-transform duration-1000 hover:scale-105">
+                    <img src="assets/images/pen-hero.png" alt="Artools Pigment Pen" class="w-full h-full object-cover transition-transform duration-1000 hover:scale-105">
                     
                     <!-- Top Left Glass Badge -->
                     <div class="absolute top-6 left-6 md:top-8 md:left-8 p-3 px-4 rounded-xl border border-white/40 bg-white/30 backdrop-blur-md flex flex-col items-center justify-center gap-1 shadow-sm">
@@ -322,7 +323,7 @@
                 <!-- Imagem -->
                 <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content">
                     <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
-                        <img src="premium_pen_light.png" alt="Artools Pigmentum Detail" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105">
+                        <img src="assets/images/pen-light.png" alt="Artools Pigmentum Detail" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105">
                         <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
                             <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Ponta Ultrafina</span>
                             <span class="text-sm font-semibold tracking-tight text-stone-800">Fluxo Ininterrupto</span>
@@ -347,7 +348,7 @@
                 <div class="w-full md:w-1/2 h-[50%] md:h-[70%] relative flex justify-center order-2 md:order-1 legacy-content-2">
                     <div class="relative w-full h-full rounded-[2rem] overflow-hidden shadow-xl bg-stone-300 border border-white/50 group">
                         <!-- Imagem 2.png Original -->
-                        <img src="IMAGEM 2.png" alt="Artools Components" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply opacity-95">
+                        <img src="assets/images/pen-hero.png" alt="Artools Components" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply opacity-95">
                         <div class="absolute bottom-6 right-6 flex items-center gap-3 backdrop-blur-md bg-white/60 p-3 rounded-full border border-white/80 shadow-sm">
                             <span class="text-[0.65rem] uppercase font-mono tracking-widest text-stone-600 font-semibold px-2">Alumínio 6061</span>
                         </div>
@@ -370,7 +371,7 @@
                 <!-- Imagem -->
                 <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content-3">
                     <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
-                        <img src="premium_arch_light.png" alt="Pigmentum Architecture" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply saturate-50">
+                        <img src="assets/images/pen-arch.png" alt="Pigmentum Architecture" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply saturate-50">
                         <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
                             <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Câmara Estanque</span>
                             <span class="text-sm font-semibold tracking-tight text-stone-800">Zero Vazamentos</span>
@@ -395,7 +396,7 @@
     <section id="cinematic-climax" class="relative h-[100dvh] w-full bg-[#050505] overflow-hidden flex items-center justify-center z-20">
         <!-- Video Background -->
         <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-70">
-            <source src="a-seamless-looping-cinematic-product-video-of-a-pr.mp4" type="video/mp4">
+            <source src="assets/video/hero-loop.mp4" type="video/mp4">
         </video>
 
         <!-- Overlay Cinemático para Escurecer e dar contraste ao Glow -->
@@ -436,13 +437,11 @@
             
             // 1. Lenis: Smooth Scroll
             const lenis = new Lenis({
-                duration: 1.5,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
-                direction: 'vertical',
-                gestureDirection: 'vertical',
-                smooth: true,
+                duration: 1.0,
+                easing: (t) => 1 - Math.pow(1 - t, 4),
                 smoothTouch: false,
-                touchMultiplier: 2,
+                touchMultiplier: 1.5,
+                lerp: 0.08,
             });
 
             function raf(time) {
