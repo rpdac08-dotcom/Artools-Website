@@ -74,23 +74,13 @@
             overflow: hidden;
             display: inline-flex;
             border-radius: 9999px;
-            padding: 2px;
-            background: rgba(0, 0, 0, 0.05); /* Leve contraste */
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
             will-change: transform;
         }
         
         .shimmer-btn-wrapper:hover {
             transform: scale(1.02);
-        }
-
-        .shimmer-btn-wrapper::before {
-            content: "";
-            position: absolute;
-            top: 50%; left: 50%; width: 300%; height: 300%;
-            background: conic-gradient(from 0deg, transparent 0 340deg, #1C1C1C 360deg);
-            transform: translate(-50%, -50%);
-            animation: spin 2.5s linear infinite;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.12);
         }
 
         .shimmer-btn {
@@ -140,6 +130,38 @@
             transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             will-change: opacity, transform, filter;
         }
+
+        /* Quarta Dobra Efeito Glow Gemini */
+        .glass-panel {
+            background: rgba(23, 23, 23, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .flashlight-card {
+            background: rgba(255, 255, 255, 0.01);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flashlight-card::before {
+            content: "";
+            position: absolute;
+            inset: 0px;
+            background: radial-gradient(
+                800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.12),
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .flashlight-card:hover::before { 
+            opacity: 1; 
+        }
     </style>
 </head>
 
@@ -148,12 +170,7 @@
     <!-- Navbar minimalista -->
     <header class="fixed top-0 left-0 w-full z-50 px-8 lg:px-12 py-6 text-stone-900 opacity-0" id="navbar">
         <div class="flex justify-between items-center max-w-[1600px] mx-auto mix-blend-difference">
-            <div class="text-lg font-bold tracking-tighter uppercase text-[#EAEAE5]">AURA.</div>
-            <nav class="hidden md:flex gap-8 text-xs font-mono uppercase tracking-widest text-stone-400">
-                <a href="#" class="hover:text-white transition-colors">Design</a>
-                <a href="#" class="hover:text-white transition-colors">Herança</a>
-                <a href="#" class="hover:text-white transition-colors">Adquirir</a>
-            </nav>
+            <div class="text-lg font-bold tracking-tighter uppercase text-[#EAEAE5]">Platinum</div>
         </div>
     </header>
 
@@ -161,10 +178,10 @@
     <main id="scroll-container" class="relative h-[350vh] bg-[#EAEAE5]">
         
         <!-- Sticky Area que segura a interface da Hero -->
-        <div class="sticky top-0 h-[100dvh] w-full flex flex-col md:flex-row overflow-hidden bg-grid cinematic-overlay">
+        <div class="sticky top-0 h-[100dvh] w-full overflow-hidden bg-grid cinematic-overlay" id="hero-sticky">
             
-            <!-- Esquerda: Typography Elements (Design System) -->
-            <div class="w-full md:w-5/12 h-1/2 md:h-full flex flex-col justify-center px-8 md:pl-16 lg:pl-32 pr-8 z-20 relative pt-20 md:pt-0 mix-blend-normal">
+            <!-- Esquerda: Typography Elements (Textos e Botões) -->
+            <div class="absolute top-0 left-0 w-full md:w-5/12 h-1/2 md:h-full flex flex-col justify-center px-8 md:pl-16 lg:pl-32 pr-8 z-20 pt-20 md:pt-0" id="hero-left-col">
                
                <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-semibold tracking-tighter leading-[0.9] text-stone-900 mb-6 lg:mb-8" id="hero-title">
                   <span class="block overflow-hidden pb-1 md:pb-3"><span class="block hero-text">Escrita</span></span>
@@ -177,29 +194,27 @@
                
                <div class="flex flex-wrap gap-6 md:gap-8 items-center opacity-0" id="hero-cta">
                   <div class="shimmer-btn-wrapper shadow-xl">
-                      <button class="shimmer-btn flex items-center gap-2">
+                      <button class="shimmer-btn flex items-center gap-2 bg-white/70 border border-stone-200">
                           Comprar agora
                       </button>
                   </div>
-                  <a href="#details" class="text-xs font-mono font-medium uppercase tracking-widest border-b border-stone-400 pb-1 text-stone-500 hover:text-stone-900 hover:border-stone-900 transition-colors">
+                  <a href="#engineering-details" class="text-xs font-mono font-medium uppercase tracking-widest border-b border-stone-400 pb-1 text-stone-500 hover:text-stone-900 hover:border-stone-900 transition-colors">
                      Ver Detalhes
                   </a>
                </div>
             </div>
 
             <!-- Direita: Cinematic Video -->
-            <div class="w-full md:w-7/12 h-1/2 md:h-full relative flex-1 bg-stone-200 overflow-hidden" id="video-wrapper">
+            <div class="absolute bottom-0 right-0 md:top-0 w-full md:w-7/12 h-1/2 md:h-full flex items-center justify-center pointer-events-none z-10" id="video-wrapper">
                
-               <!-- Gradientes para transição de opacidade/borda imperceptível do vídeo pra cor base -->
-               <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#EAEAE5] to-transparent z-10 hidden md:block"></div>
-               <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#EAEAE5] to-transparent z-10 hidden max-md:block"></div>
-               <div class="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-stone-900/10 to-transparent z-10 hidden md:block"></div>
+               <!-- Gradientes para transição de opacidade/borda imperceptível do vídeo pra cor base (SOME NA CENTRALIZAÇÃO) -->
+               <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#EAEAE5] to-transparent z-20 hidden md:block video-gradient"></div>
+               <div class="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#EAEAE5] to-transparent z-20 hidden max-md:block video-gradient"></div>
                
                <!-- Sistema de Pre-Caching Silencioso (Nível Apple) -->
-               
                <canvas 
                   id="hero-canvas" 
-                  class="w-[85%] h-[85%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain grayscale-[15%] contrast-110 opacity-0 z-10"
+                  class="w-[90%] h-[90%] md:w-[85%] md:h-[85%] object-contain grayscale-[15%] contrast-110 opacity-0 z-10"
                ></canvas>
                
                <!-- O vídeo fica escondido, usado apenas como fonte de decodificação no carregamento -->
@@ -210,21 +225,205 @@
                   muted playsinline preload="auto"
                ></video>
                
-               <!-- Tonalidade e Noise (Apple like vibe) -->
                <div class="absolute inset-0 bg-stone-900/5 mix-blend-overlay z-20 pointer-events-none"></div>
             </div>
         </div>
     </main>
 
-    <!-- Conteúdo Posterior para que o usuário sinta a continuidade do site -->
-    <section id="details" class="min-h-[90vh] bg-[#0a0a0a] text-[#EAEAE5] flex flex-col items-center justify-center p-12 lg:p-24 relative z-30">
-        <span class="text-xs font-mono uppercase tracking-[0.3em] mb-6 text-stone-500 opacity-80">Capítulo I</span>
-        <h2 class="text-4xl md:text-5xl lg:text-7xl font-semibold tracking-tighter mb-8 text-center max-w-4xl text-white">
-            Projetada para transcender o tempo.
-        </h2>
-        <p class="max-w-2xl text-center text-stone-400 text-lg md:text-xl font-light leading-relaxed">
-            O peso exato, o equilíbrio mecânico perfeito e materiais nobres que envelhecem contando sua própria história de uso. Nenhum detalhe foi deixado ao acaso.
-        </p>
+    <!-- Segunda Dobra: Engenharia Tecnológica (Light Mode Based on Reference) -->
+    <section id="engineering-details" class="min-h-screen bg-[#EAEAE5] text-[#1C1C1C] flex flex-col justify-center px-6 md:px-12 lg:px-24 py-32 relative z-30 overflow-hidden">
+        
+
+
+        <div class="max-w-[1400px] mx-auto w-full relative z-10 transition-colors">
+            <!-- Header (Textos da esquerda super grandes) -->
+            <div class="flex flex-col mb-16 md:mb-24 feature-header">
+                <h2 class="text-5xl sm:text-7xl md:text-8xl lg:text-[7rem] font-semibold tracking-tighter leading-[0.95] text-stone-900 mb-6 lg:mb-10">
+                    <span class="block">Engenharia Suíça.</span>
+                    <span class="block text-stone-400">Precisão Molecular.</span>
+                </h2>
+                <p class="max-w-xl text-stone-500 text-lg md:text-xl font-light leading-relaxed">
+                    Nossa arquitetura de fluxo proprietária sincroniza a deposição de tinta em tempo real. Construída sobre um chassi de alumínio aeroespacial usinado em CNC de 5 eixos.
+                </p>
+            </div>
+
+            <!-- Grid: Imagem Esquerda (Large), Features Direita (Column) -->
+            <div class="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-24 items-center">
+                
+                <!-- Imagem -->
+                <div class="feature-image relative w-full aspect-[4/3] md:aspect-[16/10] lg:aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-stone-300 border border-white/50">
+                    <img src="IMAGEM 2.png" alt="Artools Pigment Pen" class="w-full h-full object-cover transition-transform duration-1000 hover:scale-105">
+                    
+                    <!-- Top Left Glass Badge -->
+                    <div class="absolute top-6 left-6 md:top-8 md:left-8 p-3 px-4 rounded-xl border border-white/40 bg-white/30 backdrop-blur-md flex flex-col items-center justify-center gap-1 shadow-sm">
+                        <div class="w-4 h-5 rounded-sm bg-stone-600/80 mb-1 border-t border-white/50 shadow-inner"></div>
+                        <span class="text-[0.55rem] font-mono tracking-widest text-stone-800 uppercase font-semibold">CORE_ALU_6061</span>
+                        <div class="w-12 h-px bg-stone-500/50 mt-1"></div>
+                    </div>
+
+                    <!-- Bottom Right Glass Badge -->
+                    <div class="absolute bottom-6 right-6 md:bottom-8 md:right-8 p-4 rounded-2xl border border-white/40 bg-stone-900/10 backdrop-blur-md text-center shadow-lg">
+                        <span class="block text-3xl font-semibold text-stone-900 tracking-tighter">0.3<span class="text-sm font-medium tracking-normal ml-0.5">mm</span></span>
+                        <span class="block text-[0.55rem] font-mono tracking-widest text-stone-800 uppercase mt-2">TIP PRECISION</span>
+                    </div>
+                </div>
+
+                <!-- Lista de Features Vertical -->
+                <div class="flex flex-col gap-10 lg:gap-14 justify-center py-8">
+                    
+                    <!-- Item 1 -->
+                    <div class="relative feature-item group">
+                        <div class="absolute left-0 top-2 bottom-0 w-px bg-stone-300 transition-colors group-hover:bg-stone-500"></div>
+                        <div class="pl-8 md:pl-10 relative">
+                            <span class="absolute left-2 md:left-4 -translate-x-[110%] top-1 text-[0.65rem] font-mono text-stone-400">01</span>
+                            <h3 class="text-2xl font-semibold text-stone-900 mb-3 tracking-tight transition-colors group-hover:text-black">Alumínio Aeroespacial</h3>
+                            <p class="text-stone-500 font-light text-sm md:text-base leading-relaxed group-hover:text-stone-600 transition-colors">
+                                Estrutura monobloco usinada em Alumínio 6061-T6. Leveza extrema (14g) com resistência estrutural de nível militar.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="relative feature-item group">
+                        <div class="absolute left-0 top-2 bottom-0 w-px bg-stone-300 transition-colors group-hover:bg-stone-500"></div>
+                        <div class="pl-8 md:pl-10 relative">
+                            <span class="absolute left-2 md:left-4 -translate-x-[110%] top-1 text-[0.65rem] font-mono text-stone-400">02</span>
+                            <h3 class="text-2xl font-semibold text-stone-900 mb-3 tracking-tight transition-colors group-hover:text-black">Fluxo Híbrido</h3>
+                            <p class="text-stone-500 font-light text-sm md:text-base leading-relaxed group-hover:text-stone-600 transition-colors">
+                                Sistema de tinta de baixa viscosidade com regulação por capilaridade assistida. O traço nunca falha até 15°.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="relative feature-item group">
+                        <div class="absolute left-0 top-2 bottom-0 w-px bg-stone-300 transition-colors group-hover:bg-stone-500"></div>
+                        <div class="pl-8 md:pl-10 relative">
+                            <span class="absolute left-2 md:left-4 -translate-x-[110%] top-1 text-[0.65rem] font-mono text-stone-400">03</span>
+                            <h3 class="text-2xl font-semibold text-stone-900 mb-3 tracking-tight transition-colors group-hover:text-black">Grip Texturizado</h3>
+                            <p class="text-stone-500 font-light text-sm md:text-base leading-relaxed group-hover:text-stone-600 transition-colors">
+                                Micro-usinagem a laser cria uma superfície de aderência perfeita (Ra 0.8um) sem acumular resíduos superficiais.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terceira Dobra: A Esteira de Exposição (Light Mode Horizontal Pin, 3 Painéis) -->
+    <section id="legacy-scroll" class="relative bg-[#EAEAE5] text-[#1C1C1C] overflow-hidden h-[100dvh] w-full bg-grid">
+        <!-- The sticky container that moves horizontally -->
+        <div id="legacy-track" class="flex h-full w-[300vw] relative z-10 will-change-transform items-center">
+            
+            <!-- Painel 1: A Fluidez -->
+            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
+                <!-- Imagem -->
+                <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content">
+                    <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
+                        <img src="premium_pen_light.png" alt="Artools Pigmentum Detail" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105">
+                        <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
+                            <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Ponta Ultrafina</span>
+                            <span class="text-sm font-semibold tracking-tight text-stone-800">Fluxo Ininterrupto</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Copy -->
+                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content">
+                    <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">01 / A Consistência Absoluta</span>
+                    <h2 class="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                        Um toque.<br><span class="text-stone-400">O ponto de inflexão.</span>
+                    </h2>
+                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                        A verdadeira engenharia não é vista, é vivenciada. Sintetizamos um polímero de matriz cristalina que reage de forma orgânica ao menor contato com as fibras do papel. Sem falhas. Sem interrupções. Apenas um fluxo contínuo e impecável desenhado para blindar a velocidade do seu pensamento.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Painel 2: O Controle -->
+            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
+                <!-- Imagem -->
+                <div class="w-full md:w-1/2 h-[50%] md:h-[70%] relative flex justify-center order-2 md:order-1 legacy-content-2">
+                    <div class="relative w-full h-full rounded-[2rem] overflow-hidden shadow-xl bg-stone-300 border border-white/50 group">
+                        <!-- Imagem 2.png Original -->
+                        <img src="IMAGEM 2.png" alt="Artools Components" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply opacity-95">
+                        <div class="absolute bottom-6 right-6 flex items-center gap-3 backdrop-blur-md bg-white/60 p-3 rounded-full border border-white/80 shadow-sm">
+                            <span class="text-[0.65rem] uppercase font-mono tracking-widest text-stone-600 font-semibold px-2">Alumínio 6061</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Copy -->
+                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content-2">
+                    <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">02 / O Centro de Gravidade</span>
+                    <h2 class="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                        Balanceamento<br><span class="text-stone-400">Isobárico.</span>
+                    </h2>
+                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                        O controle absoluto exige mais que leveza; exige distribuição milimétrica. A coroa capilar e o corpo em alumínio aeroespacial 6061 foram calibrados metodicamente para que a caneta repouse de forma simbiótica no arco da sua mão. Zero fadiga muscular. Cento e cem por cento de foco criativo.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Painel 3: Arquitetura -->
+            <div class="w-[100vw] h-full flex flex-col md:flex-row items-center px-8 md:px-24 gap-12 shrink-0 py-24 md:py-0 relative">
+                <!-- Imagem -->
+                <div class="w-full md:w-1/2 flex justify-center order-2 md:order-1 legacy-content-3">
+                    <div class="relative w-full aspect-[4/3] rounded-[2rem] overflow-hidden shadow-2xl bg-white border border-stone-200 group">
+                        <img src="premium_arch_light.png" alt="Pigmentum Architecture" class="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105 mix-blend-multiply saturate-50">
+                        <div class="absolute bottom-6 left-6 p-4 rounded-xl border border-white/80 bg-white/70 backdrop-blur-md shadow-sm">
+                            <span class="text-[0.6rem] uppercase tracking-widest font-mono text-stone-500 font-semibold block mb-1">Câmara Estanque</span>
+                            <span class="text-sm font-semibold tracking-tight text-stone-800">Zero Vazamentos</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Copy -->
+                <div class="w-full md:w-1/2 order-1 md:order-2 pl-0 md:pl-16 legacy-content-3">
+                    <span class="text-stone-400 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 md:mb-6 block border-b border-stone-300 pb-2 inline-block">03 / A Longevidade</span>
+                    <h2 class="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter text-[#1C1C1C] leading-[0.95] mb-6 md:mb-8">
+                        A arquitetura<br><span class="text-stone-400">oculta.</span>
+                    </h2>
+                    <p class="text-stone-500 text-base md:text-xl font-light leading-relaxed max-w-xl">
+                        Por trás de uma superfície minimalista de pureza inegável, esconde-se um invólucro hiper-resistente. Projetada para suportar pressões extremas, a Pigmentum é uma cápsula de durabilidade vitalícia construída não apenas para você, mas para os seus herdeiros.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quarta Dobra: Clímax Cinemático (Vídeo + Glow) -->
+    <section id="cinematic-climax" class="relative h-[100dvh] w-full bg-[#050505] overflow-hidden flex items-center justify-center z-20">
+        <!-- Video Background -->
+        <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-70">
+            <source src="a-seamless-looping-cinematic-product-video-of-a-pr.mp4" type="video/mp4">
+        </video>
+
+        <!-- Overlay Cinemático para Escurecer e dar contraste ao Glow -->
+        <div class="absolute inset-0 bg-black/50 z-10 pointer-events-none"></div>
+
+        <!-- O Box Principal (Gemini Glow Effect) -->
+        <div class="relative z-20 w-[90%] max-w-[650px]" id="glow-card-container">
+            <!-- Card Structure with extracted styles -->
+            <div class="flashlight-card w-full glass-panel border border-white/10 rounded-[2rem] flex flex-col items-center justify-center p-10 md:p-16 text-center shadow-2xl transition-transform hover:scale-[1.02] duration-700 ease-out group" 
+                 onmousemove="const rect = this.getBoundingClientRect(); this.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`); this.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);">
+                 
+                <div class="mb-8 w-16 h-16 rounded-full border border-white/20 bg-white/5 flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform duration-500">
+                    <svg class="w-6 h-6 text-stone-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM12 16v-4m0-4h.01" />
+                    </svg>
+                </div>
+                
+                <span class="text-white/60 font-mono tracking-widest text-[0.65rem] md:text-xs uppercase mb-4 block border-b border-white/10 pb-2">A Essência Iluminada</span>
+                
+                <h2 class="text-4xl md:text-6xl font-light tracking-tight text-white leading-[1.1] mb-6">
+                    A forma<br><strong class="font-bold">perfeita.</strong>
+                </h2>
+                
+                <p class="text-stone-300 text-sm md:text-base font-light leading-relaxed max-w-sm mx-auto">
+                    Design atemporal validado impecavelmente através da refração da luz. Construída em liga aeroespacial para imortalizar o primeiro traço da sua história.
+                </p>
+            </div>
+        </div>
     </section>
 
     <!-- Libs (GSAP, ScrollTrigger, Lenis) -->
@@ -403,8 +602,7 @@
                 renderActiveFrame();
             }
 
-            // 4. Parallax Sutil e Efeito de Saída no Texto
-            // Conforme scrolla a primeira dobra, o texto é empurrado lentamente pra cima c/ fadeout
+            // 4. Parallax Sutil de Saída e Centralização Dinâmica do Vídeo
             const parallaxTl = gsap.timeline({
                 scrollTrigger: {
                     trigger: '#scroll-container',
@@ -415,21 +613,123 @@
             });
 
             parallaxTl
-                .to('#hero-title', { y: '-15vh', opacity: 0 }, 0)
-                .to('#hero-sub', { y: '-10vh', opacity: 0 }, 0)
-                .to('#hero-cta', { y: '-5vh', opacity: 0 }, 0);
+                .to('#hero-left-col', { x: '-20%', filter: 'blur(10px)', opacity: 0, duration: 1 }, 0)
+                .to('.video-gradient', { opacity: 0, duration: 0.5 }, 0)
+                .to('#video-wrapper', { width: '100%', ease: 'power2.inOut', duration: 1 }, 0);
             
-            // Leve escala no vídeo ao final do scroll da HERO, para integrar visualmente
-            gsap.to('#video-wrapper', {
+            // Leve escala na interface inteira ao final do scroll, para integrar visualmente na 2a dobra
+            gsap.to('#hero-sticky', {
                 scale: 0.95,
-                transformOrigin: 'right center',
+                transformOrigin: 'center center',
                 scrollTrigger: {
                     trigger: '#scroll-container',
-                    start: '10% top',
+                    start: '45% top',
                     end: 'bottom bottom',
                     scrub: true,
                 }
             });
+
+            // 5. Animações da Segunda Dobra (Engenharia Light Mode)
+            const featureSectionTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#engineering-details',
+                    start: 'top 75%', 
+                    toggleActions: 'play none none reverse'
+                }
+            });
+
+            featureSectionTl
+                .from('.feature-header', {
+                    y: 60,
+                    opacity: 0,
+                    duration: 1.2,
+                    ease: 'power3.out'
+                })
+                .from('.feature-image', {
+                    y: 80,
+                    opacity: 0,
+                    scale: 0.95,
+                    duration: 1.2,
+                    ease: 'power3.out'
+                }, '-=0.8')
+                .from('.feature-item', {
+                    x: 40,
+                    opacity: 0,
+                    duration: 1,
+                    stagger: 0.2, // Cascata dos textos na lateral direita
+                    ease: 'power3.out'
+                }, '-=1.0');
+
+            // 6. Horizontal Scroll Pinned (Terceira Dobra Light Mode)
+            const legacySection = document.getElementById('legacy-scroll');
+            const track = document.getElementById('legacy-track');
+
+            if (legacySection && track) {
+                
+                // Animação Principal de Horizontal Scroll (Pin)
+                const horizontalTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: legacySection,
+                        pin: true,
+                        scrub: 1.5,
+                        start: "top top",
+                        end: () => "+=" + (track.offsetWidth),
+                        invalidateOnRefresh: true
+                    }
+                });
+
+                // Move 2 terços (Painéis 2,3 entram arrastados) - total 66.66% do contêiner de 300vw
+                horizontalTl.to(track, {
+                    xPercent: -66.666, 
+                    ease: "none"
+                });
+
+                // Painel 1 entra na chegada da seção (Fade In suave, os outros já estarão visíveis na esteira)
+                gsap.from('.legacy-content', {
+                    y: 60,
+                    opacity: 0,
+                    stagger: 0.2,
+                    duration: 1.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: legacySection,
+                        start: "top 60%"
+                    }
+                });
+
+                // Adiciona sutil efeito Parallax para que os quadros fiquem dinâmicos enquanto rolam via esteira
+                const panels = gsap.utils.toArray('.legacy-content-2, .legacy-content-3');
+                panels.forEach(panel => {
+                    gsap.from(panel, {
+                        x: 100, // Leve deslocamento horizontal para que entrem um pouco mais devagar que o invólucro
+                        duration: 1.5,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: panel,
+                            containerAnimation: horizontalTl,
+                            start: "left 95%",
+                            toggleActions: "play none none reverse"
+                        }
+                    });
+                });
+
+            }
+
+            // --- 7. Animação da Quarta Dobra (Cinematic Clímax) ---
+            const glowCard = document.querySelector('#glow-card-container');
+            if(glowCard) {
+                gsap.from(glowCard, {
+                    y: 100,
+                    opacity: 0,
+                    scale: 0.9,
+                    duration: 1.5,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: '#cinematic-climax',
+                        start: "top 70%",
+                    }
+                });
+            }
 
         });
     </script>
