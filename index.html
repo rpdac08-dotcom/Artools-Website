@@ -160,12 +160,7 @@
 
         /* Hero mobile: caneta em cima, texto embaixo */
         @media (max-width: 767px) {
-            #hero-sticky {
-                /* Mantém como block para o GSAP poder animar posição absolute */
-                position: relative;
-                display: block;
-            }
-            /* Estado inicial: caneta ocupa metade superior (absolute) */
+            /* Caneta: ocupa metade superior — GSAP anima height via transform */
             #video-wrapper {
                 position: absolute !important;
                 top: 0 !important;
@@ -174,23 +169,20 @@
                 height: 50dvh !important;
                 right: auto !important;
                 bottom: auto !important;
-                /* GPU layer para animação suave */
-                will-change: height, top;
+                will-change: transform, height;
+                transform-origin: center top;
             }
-            /* Estado inicial: texto ocupa metade inferior */
+            /* Texto: parte do meio inferior — posicionado via translateY no JS */
             #hero-left-col {
                 position: absolute !important;
-                top: 50dvh !important;
+                top: 0 !important;
                 left: 0 !important;
                 width: 100% !important;
                 height: auto !important;
-                min-height: 50dvh;
                 padding-top: 1.5rem !important;
                 z-index: 25;
-                /* GPU layer para fade/translate */
                 will-change: transform, opacity;
-                /* Ponto de origem do translate para cima */
-                transform-origin: center top;
+                /* translateY(50dvh) aplicado pelo JS no initMobileHero() */
             }
         }
 
@@ -265,7 +257,8 @@
     </header>
 
     <!-- Scroll Container Secundário (Define a duração da interação de scroll) -->
-    <main id="scroll-container" class="relative h-[350vh] md:h-[350vh] bg-[#EAEAE5]">
+    <!-- Mobile: 160vh é suficiente para a animação da hero + transição; Desktop: 350vh para o vídeo completo -->
+    <main id="scroll-container" class="relative h-[160vh] md:h-[350vh] bg-[#EAEAE5]">
         
         <!-- Sticky Area que segura a interface da Hero -->
         <div class="sticky top-0 h-[100dvh] w-full overflow-hidden bg-grid cinematic-overlay" id="hero-sticky">
@@ -644,33 +637,76 @@
                     trigger: '#scroll-container',
                     start: 'top top',
                     end: 'bottom bottom',
-                    scrub: 0.3,   // valor baixo = resposta quase instantânea ao scroll
-                    onUpdate: (self) => {
-                        renderActiveFrame(self.progress);
-                    }
+                    scrub: 0.3,
+                    onUpdate: (self) => { renderActiveFrame(self.progress); }
                 });
 
                 function renderActiveFrame(progress) {
                     if (frames.length === 0) return;
                     const p = progress !== undefined ? progress : 0;
-                    const targetIndex = Math.floor(p * (expectedTotalFrames - 1));
-                    const safeIndex  = Math.min(Math.max(targetIndex, 0), frames.length - 1);
+                    const idx = Math.min(Math.max(Math.floor(p * (expectedTotalFrames - 1)), 0), frames.length - 1);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(frames[safeIndex], 0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(frames[idx], 0, 0, canvas.width, canvas.height);
                 }
 
                 renderActiveFrame(0);
+
+                // Mobile: posiciona o texto no estado inicial via JS
+                // (evita conflito entre CSS 50dvh fixo e GSAP que anima a posição)
+                if (isMobile) {
+                    initMobileHero();
+                }
             }
 
-            // 4. Animações de saída da Hero via scroll
+            function initMobileHero() {
+                // Define o estado inicial: texto está no meio da tela (translateY = 50dvh)
+                const vh50 = window.innerHeight * 0.5;
+                gsap.set('#hero-left-col', { y: vh50 });
+
+                // A animação ocorre nos primeiros 70% do scroll-container (160vh)
+                // = aprox. os primeiros 112vh de scroll
+                const heroExitTl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: '#scroll-container',
+                        start: 'top top',
+                        end: '70% top',   // 70% de 160vh ≈ 112vh de scroll
+                        scrub: 0.4,
+                    }
+                });
+
+                heroExitTl
+                    // 1. Texto sobe e desaparece
+                    .to('#hero-left-col', {
+                        y: -window.innerHeight * 0.25,  // sobe 25vh
+                        opacity: 0,
+                        duration: 1,
+                        ease: 'power2.in'
+                    }, 0)
+                    // 2. Gradiente topo some
+                    .to('.video-gradient', { opacity: 0, duration: 0.3 }, 0)
+                    // 3. Caneta expande para tela cheia
+                    .to('#video-wrapper', {
+                        height: window.innerHeight,  // 100dvh em pixels
+                        ease: 'power2.inOut',
+                        duration: 1
+                    }, 0)
+                    // 4. Leve zoom-in na caneta
+                    .to('#hero-canvas', {
+                        scale: 1.06,
+                        duration: 1,
+                        ease: 'power2.out'
+                    }, 0);
+            }
+
+            // 4. Animações de saída da Hero via scroll (DESKTOP apenas)
+            // Mobile: a saída é controlada por initMobileHero() dentro de initScroll()
             if (!isMobile) {
-                // ── DESKTOP: parallax clássico (texto sai pela esquerda, vídeo centraliza) ──
                 const parallaxTl = gsap.timeline({
                     scrollTrigger: {
                         trigger: '#scroll-container',
                         start: 'top top',
                         end: '50% top',
-                        scrub: 0.6,   // mais responsivo que 1.2
+                        scrub: 0.6,
                     }
                 });
 
@@ -689,43 +725,6 @@
                         scrub: 0.4,
                     }
                 });
-
-            } else {
-                // ── MOBILE: texto sobe e some, caneta centraliza ──
-                // O scroll-container tem h-[350vh]. Usamos os primeiros ~40% para essa transição.
-                const heroExitTl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: '#scroll-container',
-                        start: 'top top',
-                        end: '40% top',
-                        scrub: 0.5,
-                        // Sem pin — o sticky já cuida de manter na tela
-                    }
-                });
-
-                heroExitTl
-                    // Texto: fade out para cima
-                    .to('#hero-left-col', {
-                        y: '-40%',
-                        opacity: 0,
-                        duration: 1,
-                        ease: 'power2.in'
-                    }, 0)
-                    // Gradiente superior do vídeo some para a caneta aparecer completa
-                    .to('.video-gradient', { opacity: 0, duration: 0.3 }, 0)
-                    // Canvas: expande de metade da tela para tela cheia e centraliza
-                    .to('#video-wrapper', {
-                        height: '100dvh',
-                        top: 0,
-                        ease: 'power2.inOut',
-                        duration: 1
-                    }, 0)
-                    // Canvas em si: escala sutil para dar sensação de zoom-in na caneta
-                    .to('#hero-canvas', {
-                        scale: 1.08,
-                        duration: 1,
-                        ease: 'power2.out'
-                    }, 0);
             }
 
             // 5. Animações da Segunda Dobra
